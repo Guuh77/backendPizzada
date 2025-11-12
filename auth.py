@@ -1,23 +1,27 @@
 from datetime import datetime, timedelta
 from typing import Optional
+import bcrypt
 from jose import JWTError, jwt
-from passlib.context import CryptContext
 from fastapi import Depends, HTTPException, status
 from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
 from config import get_settings
 from database import execute_query
 
 settings = get_settings()
-pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 security = HTTPBearer()
 
 def verify_password(plain_password: str, hashed_password: str) -> bool:
     """Verifica se a senha está correta"""
-    return pwd_context.verify(plain_password, hashed_password)
+    return bcrypt.checkpw(
+        plain_password.encode('utf-8'), 
+        hashed_password.encode('utf-8')
+    )
 
 def get_password_hash(password: str) -> str:
     """Gera hash da senha"""
-    return pwd_context.hash(password)
+    salt = bcrypt.gensalt()
+    hashed = bcrypt.hashpw(password.encode('utf-8'), salt)
+    return hashed.decode('utf-8')
 
 def create_access_token(data: dict, expires_delta: Optional[timedelta] = None):
     """Cria token JWT"""
@@ -44,7 +48,6 @@ def authenticate_user(nome_completo: str, senha: str):
     if not result:
         return None
     
-    # Converter resultado em dicionário
     user = {
         "id": result[0],
         "nome_completo": result[1],
