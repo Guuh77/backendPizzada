@@ -1,0 +1,27 @@
+services:
+  - type: web
+    name: pizzada-do-roger-backend
+    env: python
+    region: oregon
+    plan: free
+    buildCommand: pip install -r backend/requirements.txt
+    startCommand: cd backend && uvicorn main:app --host 0.0.0.0 --port $PORT
+    envVars:
+      - key: DB_USER
+        value: rm561055
+      - key: DB_PASSWORD
+        value: 150206
+      - key: DB_HOST
+        value: oracle.fiap.com.br
+      - key: DB_PORT
+        value: 1521
+      - key: DB_SID
+        value: orcl
+      - key: SECRET_KEY
+        generateValue: true
+      - key: ALGORITHM
+        value: HS256
+      - key: ACCESS_TOKEN_EXPIRE_MINUTES
+        value: 30
+      - key: PYTHON_VERSION
+        value: 3.11.0
